@@ -12,11 +12,15 @@ export class Crayons {
   private words: string[];
   private editor: TextEditor;
   private decorationTypes: TextEditorDecorationType[];
+  private wordColorMap: Map<string, number>; // 存储每个词对应的颜色索引
+  private nextColorIndex: number; // 下一个可用的颜色索引
 
   constructor(editor: TextEditor) {
     this.words = [];
     this.editor = editor;
     this.decorationTypes = fromConfig();
+    this.wordColorMap = new Map();
+    this.nextColorIndex = 0;
   }
 
   public highlight() {
@@ -35,12 +39,19 @@ export class Crayons {
     this.decorationTypes.forEach(decorationType =>
       this.editor.setDecorations(decorationType, []));
     
-    // Re-apply all highlights
-    this.words.forEach((word, index) => this.decorateWithIndex(word, index));
+    // Re-apply all highlights using their fixed color indices
+    this.words.forEach(word => {
+      const colorIndex = this.wordColorMap.get(word);
+      if (colorIndex !== undefined) {
+        this.decorateWithColorIndex(word, colorIndex);
+      }
+    });
   }
 
   public clear() {
     this.words = [];
+    this.wordColorMap.clear();
+    this.nextColorIndex = 0;
     this.decorationTypes.forEach(decorationType =>
       this.editor.setDecorations(decorationType, []));
   }
@@ -49,8 +60,12 @@ export class Crayons {
     const idx = this.words.indexOf(word);
     if (idx !== -1) {
       this.words.splice(idx, 1);
-      // Re-apply all remaining highlights to maintain color consistency
-      this.refresh();
+      // 获取该词的颜色索引并清除其装饰
+      const colorIndex = this.wordColorMap.get(word);
+      if (colorIndex !== undefined) {
+        this.editor.setDecorations(this.decorationTypes[colorIndex % this.decorationTypes.length], []);
+        this.wordColorMap.delete(word);
+      }
     }
   }
 
@@ -69,12 +84,15 @@ export class Crayons {
   private decorate(word: string) {
     if (this.words.indexOf(word) === -1) {
       this.words.push(word);
+      // 为新词分配固定的颜色索引
+      this.wordColorMap.set(word, this.nextColorIndex);
+      this.nextColorIndex = (this.nextColorIndex + 1) % this.decorationTypes.length;
     }
-    const idx = this.words.indexOf(word);
-    this.decorateWithIndex(word, idx);
+    const colorIndex = this.wordColorMap.get(word)!;
+    this.decorateWithColorIndex(word, colorIndex);
   }
 
-  private decorateWithIndex(word: string, wordIndex: number) {
+  private decorateWithColorIndex(word: string, colorIndex: number) {
     const regex = RegExp(word, 'g');
     let decorations: DecorationOptions[] = [];
     let match;
@@ -88,11 +106,7 @@ export class Crayons {
       decorations.push(decoration);
     }
 
-    let decorationIdx = wordIndex;
-    if (decorationIdx >= this.decorationTypes.length) {
-      decorationIdx %= this.decorationTypes.length;
-    }
-
+    const decorationIdx = colorIndex % this.decorationTypes.length;
     this.editor.setDecorations(this.decorationTypes[decorationIdx], decorations);
   }
 
