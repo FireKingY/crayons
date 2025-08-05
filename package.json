@@ -48,7 +48,7 @@
     "keybindings":[
       {
         "command": "crayons.highlight",
-        "key": "+k"
+        "key": "oem_1 k"
       },
       {
         "command": "crayons.clear",
