@@ -33,6 +33,10 @@ export class Crayons {
       this.editor.setDecorations(decorationType, []));
   }
 
+  public updateEditor(editor: TextEditor) {
+    this.editor = editor;
+  }
+
   private getSelectedWord(): string {
     const range = this.editor.document.getWordRangeAtPosition(this.editor.selection.start);
     if (range) {
@@ -52,7 +56,7 @@ export class Crayons {
           this.editor.document.positionAt(match.index + match[0].length)
         ),
       };
-      decorations.push(decoration)
+      decorations.push(decoration);
     }
 
     if (this.words.indexOf(word) === -1) {
@@ -70,7 +74,7 @@ export class Crayons {
 
 }
 
-let editorCrayons = new Map<TextEditor, Crayons>();
+let documentCrayons = new Map<string, Crayons>();
 
 function createIfAbsent<A, B>(key: A, map: Map<A, B>, def: () => B): B {
   let value = map.get(key);
@@ -82,7 +86,16 @@ function createIfAbsent<A, B>(key: A, map: Map<A, B>, def: () => B): B {
 }
 
 export function getCrayons(editor: TextEditor): Crayons {
-  return createIfAbsent(editor, editorCrayons, () => new Crayons(editor));
+  const documentUri = editor.document.uri.toString();
+  let crayons = documentCrayons.get(documentUri);
+  if (!crayons) {
+    crayons = new Crayons(editor);
+    documentCrayons.set(documentUri, crayons);
+  } else {
+    // 更新编辑器引用，因为切换标签页时会创建新的TextEditor实例
+    crayons.updateEditor(editor);
+  }
+  return crayons;
 }
 
 function fromConfig(): TextEditorDecorationType[] {

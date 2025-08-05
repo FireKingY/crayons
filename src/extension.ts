@@ -27,8 +27,12 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeTextDocument((event) => {
       console.log("onDidChangeTextDocument", event);
     }),
-    vscode.window.onDidChangeActiveTextEditor((event) => {
-      console.log("onDidChangeActiveTextEditor", event);
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+      console.log("onDidChangeActiveTextEditor", editor);
+      if (editor) {
+        // 当切换到新的编辑器时，恢复该编辑器的高亮
+        getCrayons(editor).refresh();
+      }
     }),
   );
 
