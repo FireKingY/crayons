@@ -20,17 +20,38 @@ export class Crayons {
   }
 
   public highlight() {
-    this.decorate(this.getSelectedWord());
+    const word = this.getSelectedWord();
+    if (this.words.indexOf(word) !== -1) {
+      // Word is already highlighted, remove it
+      this.removeHighlight(word);
+    } else {
+      // Word is not highlighted, add it
+      this.decorate(word);
+    }
   }
 
   public refresh() {
-    this.words.forEach(word => this.decorate(word));
+    // Clear all decorations first
+    this.decorationTypes.forEach(decorationType =>
+      this.editor.setDecorations(decorationType, []));
+    
+    // Re-apply all highlights
+    this.words.forEach((word, index) => this.decorateWithIndex(word, index));
   }
 
   public clear() {
     this.words = [];
     this.decorationTypes.forEach(decorationType =>
       this.editor.setDecorations(decorationType, []));
+  }
+
+  public removeHighlight(word: string) {
+    const idx = this.words.indexOf(word);
+    if (idx !== -1) {
+      this.words.splice(idx, 1);
+      // Re-apply all remaining highlights to maintain color consistency
+      this.refresh();
+    }
   }
 
   public updateEditor(editor: TextEditor) {
@@ -46,6 +67,14 @@ export class Crayons {
   }
 
   private decorate(word: string) {
+    if (this.words.indexOf(word) === -1) {
+      this.words.push(word);
+    }
+    const idx = this.words.indexOf(word);
+    this.decorateWithIndex(word, idx);
+  }
+
+  private decorateWithIndex(word: string, wordIndex: number) {
     const regex = RegExp(word, 'g');
     let decorations: DecorationOptions[] = [];
     let match;
@@ -59,17 +88,12 @@ export class Crayons {
       decorations.push(decoration);
     }
 
-    if (this.words.indexOf(word) === -1) {
-      this.words.push(word);
+    let decorationIdx = wordIndex;
+    if (decorationIdx >= this.decorationTypes.length) {
+      decorationIdx %= this.decorationTypes.length;
     }
 
-    let idx = this.words.indexOf(word);
-
-    if (idx >= this.decorationTypes.length) {
-      idx %= this.decorationTypes.length;
-    }
-
-    this.editor.setDecorations(this.decorationTypes[idx], decorations);
+    this.editor.setDecorations(this.decorationTypes[decorationIdx], decorations);
   }
 
 }

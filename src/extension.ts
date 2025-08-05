@@ -24,6 +24,16 @@ export function activate(context: vscode.ExtensionContext) {
         getCrayons(editor).clear();
       }
     ),
+    vscode.commands.registerCommand(
+      "crayons.clearAll",
+      () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+        getCrayons(editor).clear();
+      }
+    ),
     vscode.workspace.onDidChangeTextDocument((event) => {
       console.log("onDidChangeTextDocument", event);
     }),

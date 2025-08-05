@@ -26,7 +26,8 @@
   },
   "activationEvents": [
     "onCommand:crayons.highlight",
-    "onCommand:crayons.clear"
+    "onCommand:crayons.clear",
+    "onCommand:crayons.clearAll"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -38,12 +39,16 @@
       {
         "command": "crayons.clear",
         "title": "Crayons: Clear"
+      },
+      {
+        "command": "crayons.clearAll",
+        "title": "Crayons: Clear All Highlights"
       }
     ],
     "keybindings":[
       {
         "command": "crayons.highlight",
-        "key": "shift+f1"
+        "key": "semicolon k"
       },
       {
         "command": "crayons.clear",
