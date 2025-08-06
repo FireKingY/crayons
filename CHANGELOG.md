@@ -1,5 +1,23 @@
 # Change Log
 
+## [0.3.0] - 2025-08-06
+### ✨ Added
+- **Regular Expression Support**: Manual input now supports regex patterns for advanced text matching
+- **Interactive Mode Selection**: Added choice dialog between plain text and regex modes
+- **Regex Examples**: Provided common regex patterns for emails, URLs, numbers, etc.
+- **Smart Text Escaping**: Automatically escape special characters in plain text mode
+
+### 🛡️ Improved
+- **Error Handling**: Added regex syntax validation with user-friendly error messages
+- **Fallback Mechanism**: Graceful fallback to plain text if regex fails
+- **Enhanced Input Dialog**: Better prompts and placeholders with regex examples
+
+### 🔧 Technical Improvements
+- Added `regexMap` to track which patterns are regex vs plain text
+- Enhanced `decorateWithColorIndex` method to handle both text types
+- Improved pattern matching logic with proper character escaping
+- Added regex validation before applying highlights
+
 ## [0.2.0] - 2025-08-06
 ### ✨ Added
 - **Smart Text Highlighting**: Enhanced highlighting logic that prioritizes selected text over word detection

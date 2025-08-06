@@ -18,6 +18,7 @@ Highlight text with crayons - A powerful VS Code extension for text highlighting
 
 ### ⌨️ Manual Text Input
 - **Custom Highlighting**: Manually input any text string to highlight
+- **Regular Expression Support**: Use regex patterns for advanced text matching
 - **Flexible Search**: Highlight terms that may not be easily selectable
 - **Toggle Highlighting**: Re-highlighting the same term removes the highlight
 
@@ -44,8 +45,16 @@ Highlight text with crayons - A powerful VS Code extension for text highlighting
 
 ### Manual Input Highlighting
 1. Press `Ctrl+Shift+F2` to open the input dialog
-2. Type the text you want to highlight
-3. Press Enter to apply the highlight
+2. Type the text you want to highlight (supports both plain text and regex)
+3. Choose between "普通文本" (plain text) or "正则表达式" (regular expression) mode
+4. Press Enter to apply the highlight
+
+#### Regular Expression Examples
+- **Email addresses**: `\b\w+@\w+\.\w+\b`
+- **URLs**: `https?://[^\s]+`
+- **Numbers**: `\b\d+\b`
+- **Words starting with capital**: `\b[A-Z]\w*\b`
+- **Function calls**: `\w+\s*\(`
 
 ### Managing Highlights
 - Use `Ctrl+Shift+F1` to clear highlights for the current selection/word
@@ -127,6 +136,12 @@ The extension automatically cycles through the defined colors when highlighting 
 4. Select the downloaded `.vsix` file
 
 ## Release Notes
+
+### v0.3.0
+- ✨ **Regular Expression Support**: Added regex pattern matching in manual input mode
+- ✨ **Smart Input Dialog**: Interactive choice between plain text and regex modes
+- 🛡️ **Error Handling**: Regex syntax validation with helpful error messages
+- 🔧 **Enhanced Matching**: Improved text matching logic with proper escaping
 
 ### v0.2.0
 - ✨ Enhanced highlighting logic: prioritize selected text over word detection

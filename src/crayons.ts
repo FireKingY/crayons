@@ -13,6 +13,7 @@ export class Crayons {
   private editor: TextEditor;
   private decorationTypes: TextEditorDecorationType[];
   private wordColorMap: Map<string, number>; // 存储每个词对应的颜色索引
+  private regexMap: Map<string, boolean>; // 存储每个词是否为正则表达式
   private nextColorIndex: number; // 下一个可用的颜色索引
 
   constructor(editor: TextEditor) {
@@ -20,6 +21,7 @@ export class Crayons {
     this.editor = editor;
     this.decorationTypes = fromConfig();
     this.wordColorMap = new Map();
+    this.regexMap = new Map();
     this.nextColorIndex = 0;
   }
 
@@ -36,18 +38,45 @@ export class Crayons {
 
   public async highlightManual() {
     const inputText = await window.showInputBox({
-      prompt: "输入要高亮的字符串",
-      placeHolder: "请输入要高亮的文本..."
+      prompt: "输入要高亮的字符串 (支持正则表达式)",
+      placeHolder: "请输入要高亮的文本，如：hello 或正则表达式如：\\b\\w+@\\w+\\.\\w+\\b"
     });
     
     if (inputText && inputText.trim()) {
       const word = inputText.trim();
-      if (this.words.indexOf(word) !== -1) {
-        // Word is already highlighted, remove it
-        this.removeHighlight(word);
-      } else {
-        // Word is not highlighted, add it
-        this.decorate(word);
+      
+      // 询问是否使用正则表达式
+      const useRegex = await window.showQuickPick(
+        [
+          { label: "普通文本", description: "按字面意思匹配文本", value: false },
+          { label: "正则表达式", description: "使用正则表达式模式匹配", value: true }
+        ],
+        {
+          placeHolder: "选择匹配模式",
+          title: "文本匹配模式"
+        }
+      );
+      
+      if (useRegex) {
+        const isRegex = useRegex.value;
+        
+        // 如果是正则表达式，验证语法
+        if (isRegex) {
+          try {
+            new RegExp(word);
+          } catch (error) {
+            window.showErrorMessage(`正则表达式语法错误: ${error}`);
+            return;
+          }
+        }
+        
+        if (this.words.indexOf(word) !== -1) {
+          // Word is already highlighted, remove it
+          this.removeHighlight(word);
+        } else {
+          // Word is not highlighted, add it
+          this.decorateWithRegex(word, isRegex);
+        }
       }
     }
   }
@@ -69,6 +98,7 @@ export class Crayons {
   public clear() {
     this.words = [];
     this.wordColorMap.clear();
+    this.regexMap.clear();
     this.nextColorIndex = 0;
     this.decorationTypes.forEach(decorationType =>
       this.editor.setDecorations(decorationType, []));
@@ -83,6 +113,7 @@ export class Crayons {
       if (colorIndex !== undefined) {
         this.editor.setDecorations(this.decorationTypes[colorIndex % this.decorationTypes.length], []);
         this.wordColorMap.delete(word);
+        this.regexMap.delete(word);
       }
     }
   }
@@ -110,6 +141,19 @@ export class Crayons {
       this.words.push(word);
       // 为新词分配固定的颜色索引
       this.wordColorMap.set(word, this.nextColorIndex);
+      this.regexMap.set(word, false); // 默认不是正则表达式
+      this.nextColorIndex = (this.nextColorIndex + 1) % this.decorationTypes.length;
+    }
+    const colorIndex = this.wordColorMap.get(word)!;
+    this.decorateWithColorIndex(word, colorIndex);
+  }
+
+  private decorateWithRegex(word: string, isRegex: boolean) {
+    if (this.words.indexOf(word) === -1) {
+      this.words.push(word);
+      // 为新词分配固定的颜色索引
+      this.wordColorMap.set(word, this.nextColorIndex);
+      this.regexMap.set(word, isRegex);
       this.nextColorIndex = (this.nextColorIndex + 1) % this.decorationTypes.length;
     }
     const colorIndex = this.wordColorMap.get(word)!;
@@ -117,10 +161,29 @@ export class Crayons {
   }
 
   private decorateWithColorIndex(word: string, colorIndex: number) {
-    const regex = RegExp(word, 'g');
+    const isRegex = this.regexMap.get(word) || false;
+    let regex: RegExp;
+    
+    try {
+      if (isRegex) {
+        // 如果是正则表达式，直接使用
+        regex = new RegExp(word, 'g');
+      } else {
+        // 如果是普通文本，转义特殊字符
+        const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        regex = new RegExp(escapedWord, 'g');
+      }
+    } catch (error) {
+      // 如果正则表达式有错误，fallback到普通文本匹配
+      const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      regex = new RegExp(escapedWord, 'g');
+    }
+    
     let decorations: DecorationOptions[] = [];
     let match;
-    while ((match = regex.exec(this.editor.document.getText()))) {
+    const text = this.editor.document.getText();
+    
+    while ((match = regex.exec(text))) {
       const decoration = {
         range: new Range(
           this.editor.document.positionAt(match.index),
