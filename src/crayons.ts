@@ -15,6 +15,8 @@ export class Crayons {
   private wordColorMap: Map<string, number>; // 存储每个词对应的颜色索引
   private regexMap: Map<string, boolean>; // 存储每个词是否为正则表达式
   private nextColorIndex: number; // 下一个可用的颜色索引
+  private autoRefreshTimer: NodeJS.Timeout | null = null; // 自动刷新定时器
+  private autoRefreshInterval: number; // 自动刷新间隔(毫秒)
 
   constructor(editor: TextEditor) {
     this.words = [];
@@ -23,6 +25,8 @@ export class Crayons {
     this.wordColorMap = new Map();
     this.regexMap = new Map();
     this.nextColorIndex = 0;
+    this.autoRefreshInterval = this.getAutoRefreshInterval();
+    this.startAutoRefresh();
   }
 
   public highlight() {
@@ -109,6 +113,48 @@ export class Crayons {
       this.editor.setDecorations(decorationType, []));
   }
 
+  // 获取自动刷新间隔配置
+  private getAutoRefreshInterval(): number {
+    const config = workspace.getConfiguration();
+    return config.get<number>('crayons.configuration.autoRefreshInterval') || 1000;
+  }
+
+  // 启动自动刷新
+  private startAutoRefresh() {
+    this.stopAutoRefresh(); // 先停止现有的定时器
+    
+    if (this.autoRefreshInterval > 0) {
+      this.autoRefreshTimer = setInterval(() => {
+        // 只有当有高亮内容时才刷新
+        if (this.words.length > 0) {
+          this.refresh();
+        }
+      }, this.autoRefreshInterval);
+    }
+  }
+
+  // 停止自动刷新
+  private stopAutoRefresh() {
+    if (this.autoRefreshTimer) {
+      clearInterval(this.autoRefreshTimer);
+      this.autoRefreshTimer = null;
+    }
+  }
+
+  // 更新自动刷新间隔
+  public updateAutoRefreshInterval() {
+    const newInterval = this.getAutoRefreshInterval();
+    if (newInterval !== this.autoRefreshInterval) {
+      this.autoRefreshInterval = newInterval;
+      this.startAutoRefresh(); // 重新启动定时器
+    }
+  }
+
+  // 销毁时清理资源
+  public dispose() {
+    this.stopAutoRefresh();
+  }
+
   public removeHighlight(word: string) {
     const idx = this.words.indexOf(word);
     if (idx !== -1) {
@@ -125,6 +171,8 @@ export class Crayons {
 
   public updateEditor(editor: TextEditor) {
     this.editor = editor;
+    // 重新启动自动刷新以适应新的编辑器
+    this.startAutoRefresh();
   }
 
   private getSelectedWord(): string {
@@ -226,6 +274,18 @@ export function getCrayons(editor: TextEditor): Crayons {
     crayons.updateEditor(editor);
   }
   return crayons;
+}
+
+export function getAllCrayonsInstances(): Crayons[] {
+  return Array.from(documentCrayons.values());
+}
+
+export function disposeCrayons(documentUri: string) {
+  const crayons = documentCrayons.get(documentUri);
+  if (crayons) {
+    crayons.dispose();
+    documentCrayons.delete(documentUri);
+  }
 }
 
 function fromConfig(): TextEditorDecorationType[] {
