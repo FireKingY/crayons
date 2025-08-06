@@ -2,7 +2,7 @@
   "name": "crayons",
   "displayName": "crayons",
   "description": "Highlight text with crayons",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "publisher": "vallyscode",
   "icon": "logo.png",
   "galleryBanner": {
@@ -112,6 +112,13 @@
                 }
               }
             ]
+          },
+          "crayons.configuration.autoRefreshInterval": {
+            "type": "number",
+            "default": 1000,
+            "minimum": 100,
+            "maximum": 10000,
+            "description": "自动刷新高亮的时间间隔(毫秒)，用于检测新增内容并应用高亮。设置为0可禁用自动刷新。"
           }
         }
       }
