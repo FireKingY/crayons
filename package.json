@@ -2,7 +2,7 @@
   "name": "crayons",
   "displayName": "crayons",
   "description": "Highlight text with crayons",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "publisher": "vallyscode",
   "icon": "logo.png",
   "galleryBanner": {
@@ -27,7 +27,8 @@
   "activationEvents": [
     "onCommand:crayons.highlight",
     "onCommand:crayons.clear",
-    "onCommand:crayons.clearAll"
+    "onCommand:crayons.clearAll",
+    "onCommand:crayons.highlightManual"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -43,6 +44,10 @@
       {
         "command": "crayons.clearAll",
         "title": "Crayons: Clear All Highlights"
+      },
+      {
+        "command": "crayons.highlightManual",
+        "title": "Crayons: Highlight Manual Input"
       }
     ],
     "keybindings":[
@@ -53,6 +58,10 @@
       {
         "command": "crayons.clear",
         "key": "ctrl+shift+f1"
+      },
+      {
+        "command": "crayons.highlightManual",
+        "key": "ctrl+shift+f2"
       }
     ],
     "configuration": [
