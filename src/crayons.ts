@@ -34,6 +34,24 @@ export class Crayons {
     }
   }
 
+  public async highlightManual() {
+    const inputText = await window.showInputBox({
+      prompt: "输入要高亮的字符串",
+      placeHolder: "请输入要高亮的文本..."
+    });
+    
+    if (inputText && inputText.trim()) {
+      const word = inputText.trim();
+      if (this.words.indexOf(word) !== -1) {
+        // Word is already highlighted, remove it
+        this.removeHighlight(word);
+      } else {
+        // Word is not highlighted, add it
+        this.decorate(word);
+      }
+    }
+  }
+
   public refresh() {
     // Clear all decorations first
     this.decorationTypes.forEach(decorationType =>
@@ -74,6 +92,12 @@ export class Crayons {
   }
 
   private getSelectedWord(): string {
+    // 如果有选中的文本，返回选中的文本
+    if (!this.editor.selection.isEmpty) {
+      return this.editor.document.getText(this.editor.selection);
+    }
+    
+    // 否则返回光标位置的单词
     const range = this.editor.document.getWordRangeAtPosition(this.editor.selection.start);
     if (range) {
       return this.editor.document.getText(range);

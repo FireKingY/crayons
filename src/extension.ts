@@ -34,6 +34,16 @@ export function activate(context: vscode.ExtensionContext) {
         getCrayons(editor).clear();
       }
     ),
+    vscode.commands.registerCommand(
+      "crayons.highlightManual",
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+        await getCrayons(editor).highlightManual();
+      }
+    ),
     vscode.workspace.onDidChangeTextDocument((event) => {
       console.log("onDidChangeTextDocument", event);
     }),
