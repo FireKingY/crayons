@@ -27,11 +27,16 @@ export class Crayons {
 
   public highlight() {
     const word = this.getSelectedWord();
-    if (this.words.indexOf(word) !== -1) {
-      // Word is already highlighted, remove it
+    
+    // 如果当前未选中文本，且当前光标所在的位置已经高亮，则将这个高亮取消
+    if (this.editor.selection.isEmpty && this.words.indexOf(word) !== -1) {
+      // 光标在已高亮的词上，取消高亮
+      this.removeHighlight(word);
+    } else if (this.words.indexOf(word) !== -1) {
+      // 选中的文本已经高亮，取消高亮
       this.removeHighlight(word);
     } else {
-      // Word is not highlighted, add it
+      // 词未高亮，添加高亮
       this.decorate(word);
     }
   }
