@@ -28,7 +28,10 @@
     "onCommand:crayons.highlight",
     "onCommand:crayons.clear",
     "onCommand:crayons.clearAll",
-    "onCommand:crayons.highlightManual"
+    "onCommand:crayons.highlightManual",
+    "onCommand:crayons.navigateNext",
+    "onCommand:crayons.navigatePrevious",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -48,6 +51,14 @@
       {
         "command": "crayons.highlightManual",
         "title": "Crayons: Highlight Manual Input"
+      },
+      {
+        "command": "crayons.navigateNext",
+        "title": "Crayons: Navigate to Next Highlight"
+      },
+      {
+        "command": "crayons.navigatePrevious",
+        "title": "Crayons: Navigate to Previous Highlight"
       }
     ],
     "keybindings":[
@@ -62,6 +73,16 @@
       {
         "command": "crayons.highlightManual",
         "key": "ctrl+shift+f2"
+      },
+      {
+        "command": "crayons.navigateNext",
+        "key": "n",
+        "when": "editorTextFocus && crayons.hasHighlights"
+      },
+      {
+        "command": "crayons.navigatePrevious",
+        "key": "shift+n",
+        "when": "editorTextFocus && crayons.hasHighlights"
       }
     ],
     "configuration": [

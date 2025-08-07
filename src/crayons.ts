@@ -6,7 +6,10 @@ import {
   TextEditorDecorationType,
   OverviewRulerLane,
   DecorationOptions,
+  Selection,
+  TextEditorRevealType,
 } from "vscode";
+import * as vscode from 'vscode';
 
 export class Crayons {
   private words: string[];
@@ -102,6 +105,9 @@ export class Crayons {
         this.decorateWithColorIndex(word, colorIndex);
       }
     });
+    
+    // Update context after refresh
+    this.updateContext();
   }
 
   public clear() {
@@ -111,6 +117,7 @@ export class Crayons {
     this.nextColorIndex = 0;
     this.decorationTypes.forEach(decorationType =>
       this.editor.setDecorations(decorationType, []));
+    this.updateContext();
   }
 
   // 获取自动刷新间隔配置
@@ -155,6 +162,135 @@ export class Crayons {
     this.stopAutoRefresh();
   }
 
+  // 更新上下文状态
+  private updateContext() {
+    const hasHighlights = this.words.length > 0;
+    vscode.commands.executeCommand('setContext', 'crayons.hasHighlights', hasHighlights);
+  }
+
+  // 跳转到下一个高亮区域
+  public navigateToNext() {
+    if (this.words.length === 0) {
+      return;
+    }
+
+    const currentPosition = this.editor.selection.active;
+    const allHighlights = this.getAllHighlightRanges();
+    
+    if (allHighlights.length === 0) {
+      return;
+    }
+
+    // 按位置排序高亮区域
+    allHighlights.sort((a, b) => a.start.compareTo(b.start));
+    
+    // 检查当前光标是否在高亮区域内
+    const currentHighlight = allHighlights.find(range => range.contains(currentPosition));
+    
+    let nextHighlight: Range | undefined;
+    
+    if (currentHighlight) {
+      // 如果当前在高亮区域内，找下一个高亮区域
+      const currentIndex = allHighlights.indexOf(currentHighlight);
+      nextHighlight = allHighlights[currentIndex + 1];
+    } else {
+      // 如果不在高亮区域内，找当前位置之后的第一个高亮区域
+      nextHighlight = allHighlights.find(range => range.start.isAfter(currentPosition));
+    }
+    
+    // 如果没有找到下一个，跳到第一个高亮区域（循环）
+    if (!nextHighlight) {
+      nextHighlight = allHighlights[0];
+    }
+    
+    // 移动光标到高亮区域的开始位置
+    this.editor.selection = new Selection(nextHighlight.start, nextHighlight.start);
+    this.editor.revealRange(nextHighlight, TextEditorRevealType.InCenter);
+  }
+
+  // 跳转到上一个高亮区域
+  public navigateToPrevious() {
+    if (this.words.length === 0) {
+      return;
+    }
+
+    const currentPosition = this.editor.selection.active;
+    const allHighlights = this.getAllHighlightRanges();
+    
+    if (allHighlights.length === 0) {
+      return;
+    }
+
+    // 按位置排序高亮区域
+    allHighlights.sort((a, b) => a.start.compareTo(b.start));
+    
+    // 检查当前光标是否在高亮区域内
+    const currentHighlight = allHighlights.find(range => range.contains(currentPosition));
+    
+    let prevHighlight: Range | undefined;
+    
+    if (currentHighlight) {
+      // 如果当前在高亮区域内，找上一个高亮区域
+      const currentIndex = allHighlights.indexOf(currentHighlight);
+      prevHighlight = allHighlights[currentIndex - 1];
+    } else {
+      // 如果不在高亮区域内，找当前位置之前的最后一个高亮区域
+      for (let i = allHighlights.length - 1; i >= 0; i--) {
+        if (allHighlights[i].start.isBefore(currentPosition)) {
+          prevHighlight = allHighlights[i];
+          break;
+        }
+      }
+    }
+    
+    // 如果没有找到上一个，跳到最后一个高亮区域（循环）
+    if (!prevHighlight) {
+      prevHighlight = allHighlights[allHighlights.length - 1];
+    }
+    
+    // 移动光标到高亮区域的开始位置
+    this.editor.selection = new Selection(prevHighlight.start, prevHighlight.start);
+    this.editor.revealRange(prevHighlight, TextEditorRevealType.InCenter);
+  }
+
+  // 获取所有高亮区域的位置
+  private getAllHighlightRanges(): Range[] {
+    const allRanges: Range[] = [];
+    
+    this.words.forEach(word => {
+      const colorIndex = this.wordColorMap.get(word);
+      if (colorIndex !== undefined) {
+        const isRegex = this.regexMap.get(word) || false;
+        let regex: RegExp;
+        
+        try {
+          if (isRegex) {
+            regex = new RegExp(word, 'g');
+          } else {
+            const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            regex = new RegExp(escapedWord, 'g');
+          }
+        } catch (error) {
+          const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          regex = new RegExp(escapedWord, 'g');
+        }
+        
+        let match;
+        const text = this.editor.document.getText();
+        
+        while ((match = regex.exec(text))) {
+          const range = new Range(
+            this.editor.document.positionAt(match.index),
+            this.editor.document.positionAt(match.index + match[0].length)
+          );
+          allRanges.push(range);
+        }
+      }
+    });
+    
+    return allRanges;
+  }
+
   public removeHighlight(word: string) {
     const idx = this.words.indexOf(word);
     if (idx !== -1) {
@@ -166,6 +302,7 @@ export class Crayons {
         this.wordColorMap.delete(word);
         this.regexMap.delete(word);
       }
+      this.updateContext();
     }
   }
 
@@ -199,6 +336,7 @@ export class Crayons {
     }
     const colorIndex = this.wordColorMap.get(word)!;
     this.decorateWithColorIndex(word, colorIndex);
+    this.updateContext();
   }
 
   private decorateWithRegex(word: string, isRegex: boolean) {
@@ -211,6 +349,7 @@ export class Crayons {
     }
     const colorIndex = this.wordColorMap.get(word)!;
     this.decorateWithColorIndex(word, colorIndex);
+    this.updateContext();
   }
 
   private decorateWithColorIndex(word: string, colorIndex: number) {

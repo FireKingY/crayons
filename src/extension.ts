@@ -44,6 +44,26 @@ export function activate(context: vscode.ExtensionContext) {
         await getCrayons(editor).highlightManual();
       }
     ),
+    vscode.commands.registerCommand(
+      "crayons.navigateNext",
+      () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+        getCrayons(editor).navigateToNext();
+      }
+    ),
+    vscode.commands.registerCommand(
+      "crayons.navigatePrevious",
+      () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+        getCrayons(editor).navigateToPrevious();
+      }
+    ),
     vscode.workspace.onDidChangeTextDocument((event) => {
       console.log("onDidChangeTextDocument", event);
     }),
