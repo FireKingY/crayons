@@ -6,7 +6,11 @@ import {
   TextEditorDecorationType,
   OverviewRulerLane,
   DecorationOptions,
+  Selection,
+  TextEditorRevealType,
+  Position,
 } from "vscode";
+import * as vscode from 'vscode';
 
 export class Crayons {
   private words: string[];
@@ -30,18 +34,26 @@ export class Crayons {
   }
 
   public highlight() {
-    const word = this.getSelectedWord();
+    const currentPosition = this.editor.selection.active;
     
-    // 如果当前未选中文本，且当前光标所在的位置已经高亮，则将这个高亮取消
-    if (this.editor.selection.isEmpty && this.words.indexOf(word) !== -1) {
-      // 光标在已高亮的词上，取消高亮
-      this.removeHighlight(word);
-    } else if (this.words.indexOf(word) !== -1) {
-      // 选中的文本已经高亮，取消高亮
-      this.removeHighlight(word);
+    // 首先检查光标是否在任何高亮区域内
+    const currentHighlightWord = this.getCurrentHighlightWord(currentPosition);
+    
+    if (currentHighlightWord) {
+      // 如果光标在高亮区域内，取消该词汇的所有高亮
+      this.removeHighlight(currentHighlightWord);
     } else {
-      // 词未高亮，添加高亮
-      this.decorate(word);
+      // 如果光标不在高亮区域内，获取要高亮的文本并添加高亮
+      const word = this.getSelectedWord();
+      if (word) {
+        if (this.words.indexOf(word) !== -1) {
+          // 如果该词汇已经高亮，取消高亮
+          this.removeHighlight(word);
+        } else {
+          // 如果该词汇未高亮，添加高亮
+          this.decorate(word);
+        }
+      }
     }
   }
 
@@ -102,6 +114,9 @@ export class Crayons {
         this.decorateWithColorIndex(word, colorIndex);
       }
     });
+    
+    // Update context after refresh
+    this.updateContext();
   }
 
   public clear() {
@@ -111,6 +126,7 @@ export class Crayons {
     this.nextColorIndex = 0;
     this.decorationTypes.forEach(decorationType =>
       this.editor.setDecorations(decorationType, []));
+    this.updateContext();
   }
 
   // 获取自动刷新间隔配置
@@ -155,6 +171,184 @@ export class Crayons {
     this.stopAutoRefresh();
   }
 
+  // 公共方法：更新光标上下文状态
+  public updateCursorContext() {
+    this.updateCursorInHighlightContext();
+  }
+
+  // 更新上下文状态
+  private updateContext() {
+    const hasHighlights = this.words.length > 0;
+    vscode.commands.executeCommand('setContext', 'crayons.hasHighlights', hasHighlights);
+    
+    // 检查光标是否在高亮区域内
+    this.updateCursorInHighlightContext();
+  }
+
+  // 检查光标是否在高亮区域内并更新上下文
+  private updateCursorInHighlightContext() {
+    if (this.words.length === 0) {
+      vscode.commands.executeCommand('setContext', 'crayons.cursorInHighlight', false);
+      return;
+    }
+
+    const currentPosition = this.editor.selection.active;
+    const allHighlights = this.getAllHighlightRanges();
+    const isInHighlight = allHighlights.some(range => range.contains(currentPosition));
+    
+    vscode.commands.executeCommand('setContext', 'crayons.cursorInHighlight', isInHighlight);
+  }
+
+  // 跳转到下一个相同颜色的高亮区域
+  public navigateToNext() {
+    if (this.words.length === 0) {
+      return;
+    }
+
+    const currentPosition = this.editor.selection.active;
+    
+    // 先找到当前光标所在的高亮区域对应的词汇
+    const currentWord = this.getCurrentHighlightWord(currentPosition);
+    if (!currentWord) {
+      return; // 如果光标不在任何高亮区域内，不做任何操作
+    }
+    
+    // 获取当前词汇的所有高亮区域
+    const sameColorHighlights = this.getHighlightRangesForWord(currentWord);
+    
+    if (sameColorHighlights.length === 0) {
+      return;
+    }
+
+    // 按位置排序高亮区域
+    sameColorHighlights.sort((a, b) => a.start.compareTo(b.start));
+    
+    // 找到当前光标所在的高亮区域
+    const currentHighlight = sameColorHighlights.find(range => range.contains(currentPosition));
+    
+    let nextHighlight: Range | undefined;
+    
+    if (currentHighlight) {
+      // 找下一个相同颜色的高亮区域
+      const currentIndex = sameColorHighlights.indexOf(currentHighlight);
+      nextHighlight = sameColorHighlights[currentIndex + 1];
+    }
+    
+    // 如果没有找到下一个，跳到第一个高亮区域（循环）
+    if (!nextHighlight) {
+      nextHighlight = sameColorHighlights[0];
+    }
+    
+    // 移动光标到高亮区域的开始位置
+    this.editor.selection = new Selection(nextHighlight.start, nextHighlight.start);
+    this.editor.revealRange(nextHighlight, TextEditorRevealType.InCenter);
+  }
+
+  // 跳转到上一个相同颜色的高亮区域
+  public navigateToPrevious() {
+    if (this.words.length === 0) {
+      return;
+    }
+
+    const currentPosition = this.editor.selection.active;
+    
+    // 先找到当前光标所在的高亮区域对应的词汇
+    const currentWord = this.getCurrentHighlightWord(currentPosition);
+    if (!currentWord) {
+      return; // 如果光标不在任何高亮区域内，不做任何操作
+    }
+    
+    // 获取当前词汇的所有高亮区域
+    const sameColorHighlights = this.getHighlightRangesForWord(currentWord);
+    
+    if (sameColorHighlights.length === 0) {
+      return;
+    }
+
+    // 按位置排序高亮区域
+    sameColorHighlights.sort((a, b) => a.start.compareTo(b.start));
+    
+    // 找到当前光标所在的高亮区域
+    const currentHighlight = sameColorHighlights.find(range => range.contains(currentPosition));
+    
+    let prevHighlight: Range | undefined;
+    
+    if (currentHighlight) {
+      // 找上一个相同颜色的高亮区域
+      const currentIndex = sameColorHighlights.indexOf(currentHighlight);
+      prevHighlight = sameColorHighlights[currentIndex - 1];
+    }
+    
+    // 如果没有找到上一个，跳到最后一个高亮区域（循环）
+    if (!prevHighlight) {
+      prevHighlight = sameColorHighlights[sameColorHighlights.length - 1];
+    }
+    
+    // 移动光标到高亮区域的开始位置
+    this.editor.selection = new Selection(prevHighlight.start, prevHighlight.start);
+    this.editor.revealRange(prevHighlight, TextEditorRevealType.InCenter);
+  }
+
+  // 获取所有高亮区域的位置
+  private getAllHighlightRanges(): Range[] {
+    const allRanges: Range[] = [];
+    
+    this.words.forEach(word => {
+      const ranges = this.getHighlightRangesForWord(word);
+      allRanges.push(...ranges);
+    });
+    
+    return allRanges;
+  }
+
+  // 获取指定词汇的所有高亮区域
+  private getHighlightRangesForWord(word: string): Range[] {
+    const ranges: Range[] = [];
+    const colorIndex = this.wordColorMap.get(word);
+    
+    if (colorIndex !== undefined) {
+      const isRegex = this.regexMap.get(word) || false;
+      let regex: RegExp;
+      
+      try {
+        if (isRegex) {
+          regex = new RegExp(word, 'g');
+        } else {
+          const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          regex = new RegExp(escapedWord, 'g');
+        }
+      } catch (error) {
+        const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        regex = new RegExp(escapedWord, 'g');
+      }
+      
+      let match;
+      const text = this.editor.document.getText();
+      
+      while ((match = regex.exec(text))) {
+        const range = new Range(
+          this.editor.document.positionAt(match.index),
+          this.editor.document.positionAt(match.index + match[0].length)
+        );
+        ranges.push(range);
+      }
+    }
+    
+    return ranges;
+  }
+
+  // 获取当前光标位置所在的高亮区域对应的词汇
+  private getCurrentHighlightWord(position: Position): string | undefined {
+    for (const word of this.words) {
+      const ranges = this.getHighlightRangesForWord(word);
+      const containingRange = ranges.find(range => range.contains(position));
+      if (containingRange) {
+        return word;
+      }
+    }
+    return undefined;
+  }
+
   public removeHighlight(word: string) {
     const idx = this.words.indexOf(word);
     if (idx !== -1) {
@@ -166,6 +360,7 @@ export class Crayons {
         this.wordColorMap.delete(word);
         this.regexMap.delete(word);
       }
+      this.updateContext();
     }
   }
 
@@ -199,6 +394,7 @@ export class Crayons {
     }
     const colorIndex = this.wordColorMap.get(word)!;
     this.decorateWithColorIndex(word, colorIndex);
+    this.updateContext();
   }
 
   private decorateWithRegex(word: string, isRegex: boolean) {
@@ -211,6 +407,7 @@ export class Crayons {
     }
     const colorIndex = this.wordColorMap.get(word)!;
     this.decorateWithColorIndex(word, colorIndex);
+    this.updateContext();
   }
 
   private decorateWithColorIndex(word: string, colorIndex: number) {

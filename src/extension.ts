@@ -44,6 +44,26 @@ export function activate(context: vscode.ExtensionContext) {
         await getCrayons(editor).highlightManual();
       }
     ),
+    vscode.commands.registerCommand(
+      "crayons.navigateNext",
+      () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+        getCrayons(editor).navigateToNext();
+      }
+    ),
+    vscode.commands.registerCommand(
+      "crayons.navigatePrevious",
+      () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+        getCrayons(editor).navigateToPrevious();
+      }
+    ),
     vscode.workspace.onDidChangeTextDocument((event) => {
       console.log("onDidChangeTextDocument", event);
     }),
@@ -52,6 +72,13 @@ export function activate(context: vscode.ExtensionContext) {
       if (editor) {
         // 当切换到新的编辑器时，恢复该编辑器的高亮
         getCrayons(editor).refresh();
+      }
+    }),
+    // 监听光标位置变化
+    vscode.window.onDidChangeTextEditorSelection((event) => {
+      if (event.textEditor === vscode.window.activeTextEditor) {
+        // 当光标位置改变时，更新上下文状态
+        getCrayons(event.textEditor).updateCursorContext();
       }
     }),
     // 监听配置变更
