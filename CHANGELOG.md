@@ -1,5 +1,18 @@
 # Change Log
 
+## [0.4.4] - 2025-01-27
+### 📚 Documentation Update
+- **中文 README**: Added comprehensive Chinese documentation as default
+- **Language Switch**: Added language switching links in both README files
+- **Updated Features**: Complete documentation of all navigation and toggle features
+- **Better UX**: Improved user experience with native language support
+
+### 🌐 Localization
+- Default README is now in Chinese
+- English README available via language switch
+- Complete feature documentation in both languages
+- Clear examples and usage instructions
+
 ## [0.4.3] - 2025-01-27
 ### 🔧 Fixed Toggle Highlight Logic
 - **Precise Toggle**: When cursor is in highlighted area, toggle now cancels that specific highlight

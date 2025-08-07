@@ -2,69 +2,110 @@
 
 # Crayons
 
-Highlight text with crayons - A powerful VS Code extension for text highlighting
+用彩色蜡笔高亮文本 - 强大的 VS Code 文本高亮扩展
 
-![Extension preview](screenshots/preview.png)
+![扩展预览](screenshots/preview.png)
 
 </div>
 
-## Features
+---
 
-### 🎨 Smart Text Highlighting
-- **Selected Text Priority**: If you have text selected, it will highlight the selection
-- **Word Detection**: If no text is selected, it highlights the word at cursor position
-- **Multiple Colors**: Automatically cycles through different colors for different highlighted terms
-- **Persistent Highlights**: Highlights are preserved when switching between files
+**🌐 Language / 语言**
 
-### ⌨️ Manual Text Input
-- **Custom Highlighting**: Manually input any text string to highlight
-- **Regular Expression Support**: Use regex patterns for advanced text matching
-- **Flexible Search**: Highlight terms that may not be easily selectable
-- **Toggle Highlighting**: Re-highlighting the same term removes the highlight
+[**English**](README_EN.md) | **中文**
 
-### 🔧 Management Commands
-- **Clear Individual**: Remove specific highlights
-- **Clear All**: Remove all highlights from current file
-- **Cross-file Support**: Each file maintains its own highlight state
+---
 
-## Commands
+## ✨ 功能特性
 
-| Command | Description | Default Keybinding |
-|---------|-------------|-------------------|
-| `Crayons: Highlight` | Highlight selected text or word at cursor | `; k` |
-| `Crayons: Highlight Manual Input` | Open input box to manually enter text to highlight | `Ctrl+Shift+F2` |
-| `Crayons: Clear` | Clear highlights for current selection/word | `Ctrl+Shift+F1` |
-| `Crayons: Clear All Highlights` | Clear all highlights in current file | - |
+### 🎨 智能文本高亮
+- **选中文本优先**: 如果选中了文本，将高亮选中的内容
+- **光标词汇检测**: 未选中文本时，高亮光标位置的单词
+- **多种颜色**: 不同的高亮词汇自动循环使用不同颜色
+- **持久化高亮**: 切换文件时保持高亮状态
 
-## Usage
+### 🔄 高亮导航
+- **相同颜色导航**: 使用 `n` 键跳转到下一个相同颜色的高亮
+- **反向导航**: 使用 `Shift+N` 键跳转到上一个相同颜色的高亮  
+- **智能激活**: 只有当光标在高亮区域内时，导航键才生效
+- **Vim 兼容**: 光标不在高亮区域时，n/N 键保持原生功能（如 vim 搜索）
 
-### Quick Highlighting
-1. **Select text** and press `; k` to highlight the selection
-2. **Place cursor** on a word and press `; k` to highlight that word
-3. Press the same shortcut on highlighted text to **remove the highlight**
+### ⌨️ 手动文本输入
+- **自定义高亮**: 手动输入任意文本字符串进行高亮
+- **正则表达式支持**: 使用正则表达式模式进行高级文本匹配
+- **灵活搜索**: 高亮难以选择的文本内容
+- **切换高亮**: 重复高亮相同词汇会移除高亮
 
-### Manual Input Highlighting
-1. Press `Ctrl+Shift+F2` to open the input dialog
-2. Type the text you want to highlight (supports both plain text and regex)
-3. Choose between "普通文本" (plain text) or "正则表达式" (regular expression) mode
-4. Press Enter to apply the highlight
+### 🔧 智能切换逻辑
+- **精确光标检测**: 当光标在高亮区域内时，切换会取消该特定高亮
+- **智能添加**: 当光标不在高亮区域内时，为当前词汇添加高亮
+- **直观操作**: 基于实际光标位置的精确行为
 
-#### Regular Expression Examples
-- **Email addresses**: `\b\w+@\w+\.\w+\b`
-- **URLs**: `https?://[^\s]+`
-- **Numbers**: `\b\d+\b`
-- **Words starting with capital**: `\b[A-Z]\w*\b`
-- **Function calls**: `\w+\s*\(`
+### 📋 管理命令
+- **清除个别**: 移除特定高亮
+- **清除全部**: 移除当前文件的所有高亮  
+- **跨文件支持**: 每个文件维护自己的高亮状态
 
-### Managing Highlights
-- Use `Ctrl+Shift+F1` to clear highlights for the current selection/word
-- Use the Command Palette (`Ctrl+Shift+P`) and search for "Crayons: Clear All Highlights" to remove all highlights
+## 🎯 命令列表
 
-## Configuration
+| 命令 | 描述 | 默认快捷键 |
+|------|------|-----------|
+| `Crayons: Highlight` | 高亮选中文本或光标处的单词 | `; k` |
+| `Crayons: Highlight Manual Input` | 打开输入框手动输入要高亮的文本 | `Ctrl+Shift+F2` |
+| `Crayons: Clear` | 清除当前选中/光标处的高亮 | `Ctrl+Shift+F1` |
+| `Crayons: Clear All Highlights` | 清除当前文件的所有高亮 | - |
+| `Crayons: Navigate to Next Highlight` | 跳转到下一个相同颜色的高亮 | `n` (光标在高亮时) |
+| `Crayons: Navigate to Previous Highlight` | 跳转到上一个相同颜色的高亮 | `Shift+N` (光标在高亮时) |
 
-### Color Customization
+## 📖 使用方法
 
-You can customize the highlighting colors in your VS Code settings:
+### 快速高亮
+1. **选中文本**并按 `; k` 高亮选中内容
+2. **将光标放在单词上**并按 `; k` 高亮该单词
+3. 在已高亮的文本上按相同快捷键可以**移除高亮**
+
+### 高亮导航
+1. **将光标放在任意高亮区域内**
+2. 按 `n` 键跳转到**下一个相同颜色**的高亮
+3. 按 `Shift+N` 键跳转到**上一个相同颜色**的高亮
+4. **光标不在高亮区域时**，n/N 键保持原生功能（如 vim 搜索）
+
+#### 📍 导航示例
+```javascript
+function calculate() {     // "calculate" 蓝色高亮
+  let result = 0;         // "result" 红色高亮
+  calculate(result);      // "calculate" 蓝色, "result" 红色
+  return result;          // "result" 红色高亮
+}
+```
+
+**导航行为**:
+- 光标在蓝色 "calculate" 上按 `n` → 跳转到下一个蓝色 "calculate"
+- 光标在红色 "result" 上按 `n` → 跳转到下一个红色 "result"
+- 光标在非高亮区域按 `n` → 使用原生功能（如 vim 搜索）
+
+### 手动输入高亮
+1. 按 `Ctrl+Shift+F2` 打开输入对话框
+2. 输入要高亮的文本（支持普通文本和正则表达式）
+3. 选择 "普通文本" 或 "正则表达式" 模式
+4. 按回车应用高亮
+
+#### 📝 正则表达式示例
+- **邮箱地址**: `\b\w+@\w+\.\w+\b`
+- **网址**: `https?://[^\s]+`
+- **数字**: `\b\d+\b`
+- **大写字母开头的单词**: `\b[A-Z]\w*\b`
+- **函数调用**: `\w+\s*\(`
+
+### 管理高亮
+- 使用 `Ctrl+Shift+F1` 清除当前选中/光标处的高亮
+- 使用命令面板 (`Ctrl+Shift+P`) 搜索 "Crayons: Clear All Highlights" 移除所有高亮
+
+## ⚙️ 配置设置
+
+### 颜色自定义
+
+在 VS Code 设置中自定义高亮颜色：
 
 ```json
 {
@@ -88,82 +129,78 @@ You can customize the highlighting colors in your VS Code settings:
         "bg": "#c7cae4",
         "fg": "#ffffff"
       }
-    },
-    {
-      "light": {
-        "bg": "#68b261",
-        "fg": "#cae4c7"
-      },
-      "dark": {
-        "bg": "#cae4c7",
-        "fg": "#ffffff"
-      }
-    },
-    {
-      "light": {
-        "bg": "#61b2ab",
-        "fg": "#c7e4e1"
-      },
-      "dark": {
-        "bg": "#61b2ab",
-        "fg": "#c7e4e1"
-      }
     }
   ]
 }
 ```
 
-### Color Properties
-- `bg`: Background color for the highlight
-- `fg`: Foreground (text) color
-- `light`: Colors used in light theme
-- `dark`: Colors used in dark theme
+### 自动刷新设置
 
-The extension automatically cycles through the defined colors when highlighting different terms.
+```json
+{
+  "crayons.configuration.autoRefreshInterval": 1000
+}
+```
 
-## Installation
+### 颜色属性说明
+- `bg`: 高亮的背景颜色
+- `fg`: 前景（文字）颜色  
+- `light`: 浅色主题使用的颜色
+- `dark`: 深色主题使用的颜色
 
-### From VS Code Marketplace
-1. Open VS Code
-2. Go to Extensions (`Ctrl+Shift+X`)
-3. Search for "crayons"
-4. Click Install
+扩展会在高亮不同词汇时自动循环使用定义的颜色。
 
-### From GitHub Release
-1. Download the latest `.vsix` file from [GitHub Releases](https://github.com/FireKingY/crayons/releases)
-2. Open VS Code
-3. Press `Ctrl+Shift+P` and run "Extensions: Install from VSIX..."
-4. Select the downloaded `.vsix` file
+## 📦 安装方法
 
-## Release Notes
+### 从 VS Code 应用商店安装
+1. 打开 VS Code
+2. 进入扩展页面 (`Ctrl+Shift+X`)
+3. 搜索 "crayons"
+4. 点击安装
+
+### 从 GitHub Release 安装
+1. 从 [GitHub Releases](https://github.com/FireKingY/crayons/releases) 下载最新的 `.vsix` 文件
+2. 打开 VS Code
+3. 按 `Ctrl+Shift+P` 运行 "Extensions: Install from VSIX..."
+4. 选择下载的 `.vsix` 文件
+
+## 📋 更新日志
+
+### v0.4.3 - 最新版本
+- 🔧 **修复高亮切换逻辑**: 基于光标位置的精确高亮切换
+- ✨ **智能光标检测**: 使用精确的光标位置检测高亮区域
+- 🎯 **改进用户体验**: 更直观和可预测的切换行为
+
+### v0.4.2
+- 🔧 **相同颜色导航**: n/N 现在只在相同颜色的高亮之间跳转
+- ✨ **精确颜色匹配**: 添加精确的颜色检测和词汇特定导航
+- 🎯 **独立颜色组**: 不同颜色的高亮形成独立的导航循环
+
+### v0.4.1  
+- 🔧 **光标位置检测**: n/N 键只有在光标位于高亮区域内时才生效
+- ✨ **Vim 兼容性**: 光标不在高亮区域时，n/N 键保持原生功能
+- 🛡️ **实时检测**: 自动监听光标位置变化，实时更新按键上下文
+
+### v0.4.0
+- ✨ **高亮导航**: 使用 n (下一个) 和 Shift+N (上一个) 键在高亮之间导航
+- 🎯 **智能光标检测**: 智能检测光标在高亮区域内的位置
+- ⚡ **高优先级按键**: n/N 键在存在高亮时覆盖 vim 插件搜索功能
+- 🔄 **循环导航**: 在高亮区域间无缝循环，并自动居中显示
 
 ### v0.3.0
-- ✨ **Regular Expression Support**: Added regex pattern matching in manual input mode
-- ✨ **Smart Input Dialog**: Interactive choice between plain text and regex modes
-- 🛡️ **Error Handling**: Regex syntax validation with helpful error messages
-- 🔧 **Enhanced Matching**: Improved text matching logic with proper escaping
+- ✨ **正则表达式支持**: 在手动输入模式中添加正则表达式模式匹配
+- ✨ **智能输入对话框**: 普通文本和正则表达式模式的交互式选择
+- 🛡️ **错误处理**: 正则表达式语法验证和有用的错误消息
+- 🔧 **增强匹配**: 改进的文本匹配逻辑和适当的转义
 
-### v0.2.0
-- ✨ Enhanced highlighting logic: prioritize selected text over word detection
-- ✨ Added manual text input command with `Ctrl+Shift+F2` shortcut
-- 🐛 Improved highlighting behavior for better user experience
-- 📖 Updated documentation and README
+## 🤝 贡献
 
-### v0.1.1
-- Initial release
-- Basic text highlighting functionality
-- Multiple color support
-- Clear commands
+欢迎提交 Issues 和 Pull Requests！请访问我们的 [GitHub 仓库](https://github.com/FireKingY/crayons)。
 
-## Contributing
+## 📄 许可证
 
-Issues and pull requests are welcome! Please visit our [GitHub repository](https://github.com/FireKingY/crayons).
-
-## License
-
-See [LICENSE](LICENSE)
+查看 [LICENSE](LICENSE)
 
 ---
 
-**Enjoy highlighting! 🎨**
-
+**享受高亮的乐趣！ 🎨**
