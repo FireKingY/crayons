@@ -1,5 +1,24 @@
 # Change Log
 
+## [0.4.0] - 2025-01-27
+### ✨ Added
+- **Highlight Navigation**: Navigate between highlighted areas using `n` (next) and `Shift+N` (previous) keys
+- **Smart Cursor Detection**: Intelligently detects when cursor is within a highlighted area
+- **High-Priority Keybindings**: n/N keys override vim plugin search functionality when highlights exist
+- **Context-Aware Activation**: Navigation keys only work when there are active highlights
+- **Circular Navigation**: Seamlessly wrap around from last to first highlight and vice versa
+
+### 🛡️ Improved
+- **Enhanced Navigation Logic**: Smart positioning based on current cursor location
+- **Visual Feedback**: Automatic centering of highlighted areas when navigating
+- **Priority Override**: Configurable keybinding priority to work with other extensions
+
+### 🔧 Technical Improvements
+- Added `navigateToNext()` and `navigateToPrevious()` methods
+- Implemented `getAllHighlightRanges()` for comprehensive highlight tracking
+- Added context management with `crayons.hasHighlights` for conditional keybinding activation
+- Enhanced command registration and package.json configuration
+
 ## [0.3.0] - 2025-08-06
 ### ✨ Added
 - **Regular Expression Support**: Manual input now supports regex patterns for advanced text matching
