@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.4.2] - 2025-01-27
+### 🔧 Critical Fix
+- **Same Color Navigation**: Now correctly navigates only between highlights of the **same color/word**
+- **Precise Color Matching**: Added `getCurrentHighlightWord()` to detect current highlight's word/color
+- **Improved Logic**: `getHighlightRangesForWord()` gets ranges for specific words only
+
+### 🎯 Correct Behavior Now
+- When cursor is in a **blue** highlight, n/N navigates only between **blue** highlights
+- When cursor is in a **red** highlight, n/N navigates only between **red** highlights  
+- Different colored highlights are treated separately
+
 ## [0.4.1] - 2025-01-27
 ### 🔧 Fixed
 - **Cursor-Based Navigation**: n/N keys now only work when cursor is **inside** a highlighted area
