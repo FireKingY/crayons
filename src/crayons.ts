@@ -34,18 +34,26 @@ export class Crayons {
   }
 
   public highlight() {
-    const word = this.getSelectedWord();
+    const currentPosition = this.editor.selection.active;
     
-    // 如果当前未选中文本，且当前光标所在的位置已经高亮，则将这个高亮取消
-    if (this.editor.selection.isEmpty && this.words.indexOf(word) !== -1) {
-      // 光标在已高亮的词上，取消高亮
-      this.removeHighlight(word);
-    } else if (this.words.indexOf(word) !== -1) {
-      // 选中的文本已经高亮，取消高亮
-      this.removeHighlight(word);
+    // 首先检查光标是否在任何高亮区域内
+    const currentHighlightWord = this.getCurrentHighlightWord(currentPosition);
+    
+    if (currentHighlightWord) {
+      // 如果光标在高亮区域内，取消该词汇的所有高亮
+      this.removeHighlight(currentHighlightWord);
     } else {
-      // 词未高亮，添加高亮
-      this.decorate(word);
+      // 如果光标不在高亮区域内，获取要高亮的文本并添加高亮
+      const word = this.getSelectedWord();
+      if (word) {
+        if (this.words.indexOf(word) !== -1) {
+          // 如果该词汇已经高亮，取消高亮
+          this.removeHighlight(word);
+        } else {
+          // 如果该词汇未高亮，添加高亮
+          this.decorate(word);
+        }
+      }
     }
   }
 

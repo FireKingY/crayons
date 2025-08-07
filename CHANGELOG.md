@@ -1,5 +1,21 @@
 # Change Log
 
+## [0.4.3] - 2025-01-27
+### 🔧 Fixed Toggle Highlight Logic
+- **Precise Toggle**: When cursor is in highlighted area, toggle now cancels that specific highlight
+- **Smart Detection**: Uses cursor position to detect actual highlighted area, not just word matching
+- **Improved Logic**: First checks if cursor is in highlight area, then decides to add/remove highlight
+
+### 🎯 Correct Toggle Behavior Now
+- **Cursor IN highlight area** → Toggle cancels the current highlight 
+- **Cursor NOT in highlight area** → Toggle adds new highlight or removes existing word highlight
+- **More precise and intuitive** toggle behavior based on actual cursor position
+
+### 🔧 Technical Improvements  
+- Use `getCurrentHighlightWord()` for precise highlight detection
+- Better separation of highlight addition vs removal logic
+- More accurate cursor-based highlight detection
+
 ## [0.4.2] - 2025-01-27
 ### 🔧 Critical Fix
 - **Same Color Navigation**: Now correctly navigates only between highlights of the **same color/word**
