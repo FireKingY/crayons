@@ -162,10 +162,32 @@ export class Crayons {
     this.stopAutoRefresh();
   }
 
+  // 公共方法：更新光标上下文状态
+  public updateCursorContext() {
+    this.updateCursorInHighlightContext();
+  }
+
   // 更新上下文状态
   private updateContext() {
     const hasHighlights = this.words.length > 0;
     vscode.commands.executeCommand('setContext', 'crayons.hasHighlights', hasHighlights);
+    
+    // 检查光标是否在高亮区域内
+    this.updateCursorInHighlightContext();
+  }
+
+  // 检查光标是否在高亮区域内并更新上下文
+  private updateCursorInHighlightContext() {
+    if (this.words.length === 0) {
+      vscode.commands.executeCommand('setContext', 'crayons.cursorInHighlight', false);
+      return;
+    }
+
+    const currentPosition = this.editor.selection.active;
+    const allHighlights = this.getAllHighlightRanges();
+    const isInHighlight = allHighlights.some(range => range.contains(currentPosition));
+    
+    vscode.commands.executeCommand('setContext', 'crayons.cursorInHighlight', isInHighlight);
   }
 
   // 跳转到下一个高亮区域

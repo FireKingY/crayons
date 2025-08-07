@@ -1,5 +1,16 @@
 # Change Log
 
+## [0.4.1] - 2025-01-27
+### 🔧 Fixed
+- **Cursor-Based Navigation**: n/N keys now only work when cursor is **inside** a highlighted area
+- **Smart Context Detection**: Automatically detects cursor position changes and updates context
+- **Vim Compatibility**: When cursor is outside highlights, n/N keys work normally with vim search
+
+### 🛡️ Improved
+- **Real-time Context Updates**: Cursor position changes are monitored in real-time
+- **Better Integration**: Seamless integration with other extensions and vim plugins
+- **Precise Activation**: More precise control over when navigation keys are active
+
 ## [0.4.0] - 2025-01-27
 ### ✨ Added
 - **Highlight Navigation**: Navigate between highlighted areas using `n` (next) and `Shift+N` (previous) keys

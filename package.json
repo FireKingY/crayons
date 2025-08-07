@@ -2,7 +2,7 @@
   "name": "crayons",
   "displayName": "crayons",
   "description": "Highlight text with crayons",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "publisher": "vallyscode",
   "icon": "logo.png",
   "galleryBanner": {
@@ -77,12 +77,12 @@
       {
         "command": "crayons.navigateNext",
         "key": "n",
-        "when": "editorTextFocus && crayons.hasHighlights"
+        "when": "editorTextFocus && crayons.cursorInHighlight"
       },
       {
         "command": "crayons.navigatePrevious",
         "key": "shift+n",
-        "when": "editorTextFocus && crayons.hasHighlights"
+        "when": "editorTextFocus && crayons.cursorInHighlight"
       }
     ],
     "configuration": [

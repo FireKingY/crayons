@@ -74,6 +74,13 @@ export function activate(context: vscode.ExtensionContext) {
         getCrayons(editor).refresh();
       }
     }),
+    // 监听光标位置变化
+    vscode.window.onDidChangeTextEditorSelection((event) => {
+      if (event.textEditor === vscode.window.activeTextEditor) {
+        // 当光标位置改变时，更新上下文状态
+        getCrayons(event.textEditor).updateCursorContext();
+      }
+    }),
     // 监听配置变更
     vscode.workspace.onDidChangeConfiguration((event) => {
       // 检查是否是我们关心的配置发生了变化
